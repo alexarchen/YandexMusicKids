@@ -1,21 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MusicApp.Interfaces;
+using MusicApp.ViewModel;
 using Xamarin.Forms;
+using Xamarin.Forms.Xaml;
 
-namespace MusicApp
+namespace MusicApp;
+
+[XamlCompilation(XamlCompilationOptions.Compile)]
+public partial class MainPage : ContentPage
 {
-    // Learn more about making custom code visible in the Xamarin.Forms previewer
-    // by visiting https://aka.ms/xamarinforms-previewer
-    [DesignTimeVisible(false)]
-    public partial class MainPage : ContentPage
+    private readonly IMusicLoader _loader;
+
+    public MainPage(IMusicLoader loader)
     {
-        public MainPage()
-        {
-            InitializeComponent();
-        }
+        _loader = loader;
+
+        BindingContext = new MainPageViewModel(loader);
+        
+        InitializeComponent();
     }
 }

@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MusicApp.Login">
+    <ContentPage.Content>
+        <StackLayout Orientation="Vertical" VerticalOptions="Center" 
+                     HorizontalOptions="Center">
+            <StackLayout Orientation="Vertical" HorizontalOptions="Center">
+                <Image Source="xamarin_logo.png" WidthRequest="200"></Image>
+                <Label Text="Login" HorizontalOptions="StartAndExpand"  WidthRequest="200"/>
+                <Entry Text="{Binding Login}" WidthRequest="200" HorizontalOptions="StartAndExpand"></Entry>
+                <Label Text="Password" HorizontalOptions="StartAndExpand"   WidthRequest="200"/>
+                <Entry Text="{Binding Password}" WidthRequest="200" IsPassword="True" HorizontalOptions="StartAndExpand"></Entry>
+                <StackLayout Orientation="Horizontal"  WidthRequest="200">
+                    <Button Text="Login" Clicked="LoginButton_Clicked" BackgroundColor="RoyalBlue"></Button>
+                </StackLayout>
+            </StackLayout>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

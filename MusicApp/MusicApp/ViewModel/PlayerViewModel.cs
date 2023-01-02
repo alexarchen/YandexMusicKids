@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text;
 using System.Windows.Input;
+using MusicApp.Interfaces;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 
@@ -12,12 +13,17 @@ namespace MusicApp.ViewModel
 {
     public class PlayerViewModel : BaseViewModel
     {
-        public PlayerViewModel(Music selectedMusic, ObservableCollection<Music> musicList)
+        private IMusicLoader _loader;
+        public PlayerViewModel(Music selectedMusic, ObservableCollection<Music> musicList, IMusicLoader loader)
         {
             this.selectedMusic = selectedMusic;
             this.musicList = musicList;
+            _loader = loader;
+            
             PlayMusic(selectedMusic);
             isPlaying = true;
+            
+            // TODO: lazy load track urls 
         }
 
         #region Properties
@@ -127,7 +133,7 @@ namespace MusicApp.ViewModel
         private async void PlayMusic(Music music)
         {
             var mediaInfo = CrossMediaManager.Current;
-            await mediaInfo.Play(music?.Url);
+            await mediaInfo.Play(music.Url ?? _loader.GetTrackUrl(music?.Id));
             IsPlaying = true;
 
             mediaInfo.MediaItemFinished += (sender, args) =>
