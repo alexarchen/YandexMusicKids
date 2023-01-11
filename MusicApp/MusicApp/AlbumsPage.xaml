@@ -3,14 +3,16 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewModel="clr-namespace:MusicApp.ViewModel;assembly=MusicApp"
-             x:Class="MusicApp.MainPage">
+             x:Class="MusicApp.AlbumsPage"
+             IconImageSource="album.png"
+             Title="Albums">
     <ContentPage.BindingContext>
         <viewModel:AlbumsViewModel/>
     </ContentPage.BindingContext>    
     <ContentPage.Content>
         <StackLayout Orientation="Vertical">
             <RefreshView IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
-                <CollectionView ItemsSource="{Binding FavoriteAlbums}" VerticalOptions="FillAndExpand" 
+                <CollectionView ItemsSource="{Binding Albums}" VerticalOptions="FillAndExpand" 
                                 HorizontalOptions="FillAndExpand" ItemsLayout="VerticalList" SelectionMode="Single" SelectionChanged="SelectableItemsView_OnSelectionChanged">
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
@@ -41,11 +43,6 @@
                     </CollectionView.ItemTemplate>
                 </CollectionView>
                 </RefreshView>
-   <StackLayout Orientation="Horizontal">
-                <Button Text="Main"></Button>
-                <Button Text="Tracks" Clicked="Tracks_OnClicked"></Button>
-                <Button Text="User" Clicked="AccountButton_OnClicked"></Button>
-            </StackLayout>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

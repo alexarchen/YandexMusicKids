@@ -1,13 +1,20 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 
-<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+<TabbedPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="MusicApp.MainPage">
-    <ContentPage.Content>
-        <StackLayout>
-            <Label Text="Hello, world!"
-                   VerticalOptions="CenterAndExpand"
-                   HorizontalOptions="CenterAndExpand" />
-        </StackLayout>
-    </ContentPage.Content>
-</ContentPage>
+             x:Class="MusicApp.MainPage"
+             xmlns:android="clr-namespace:Xamarin.Forms.PlatformConfiguration.AndroidSpecific;assembly=Xamarin.Forms.Core"
+             xmlns:musicApp="clr-namespace:MusicApp;assembly=MusicApp"
+             android:TabbedPage.ToolbarPlacement="Bottom"
+             >
+    <musicApp:AlbumsPage />
+    <NavigationPage Title="Tracks" IconImageSource="musicalbums.png">
+        <x:Arguments>
+            <musicApp:LikedTracksPage />
+        </x:Arguments>
+    </NavigationPage>
+    <musicApp:ArtistsPage />
+    <musicApp:Account/>
+</TabbedPage>
+
+

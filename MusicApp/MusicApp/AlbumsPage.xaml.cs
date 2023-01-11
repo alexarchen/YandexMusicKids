@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using MusicApp.Interfaces;
+using MusicApp.Framework;
 using MusicApp.Model;
 using MusicApp.ViewModel;
 using Xamarin.Forms;
@@ -9,17 +9,23 @@ using Xamarin.Forms.Xaml;
 namespace MusicApp;
 
 [XamlCompilation(XamlCompilationOptions.Compile)]
-public partial class MainPage : ContentPage
+public partial class AlbumsPage : ContentPage
 {
-    private readonly IMusicLoader _loader;
+    protected IMusicLoader _loader;
 
-    public MainPage(IMusicLoader loader)
+    public AlbumsPage(IMusicLoader loader)
     {
         _loader = loader;
-
         InitializeComponent();
-        
         BindingContext = new AlbumsViewModel(loader);
+    }
+
+    public AlbumsPage()
+    {
+        _loader = (Application.Current as App)?.Loader;
+        InitializeComponent();
+        BindingContext = new AlbumsViewModel(_loader);
+        
     }
 
     public AlbumsViewModel ViewModel => BindingContext as AlbumsViewModel;
@@ -39,15 +45,6 @@ public partial class MainPage : ContentPage
 
             (sender as CollectionView)!.SelectedItem = null;
         }
-    }
-
-    private async void Tracks_OnClicked(object sender, EventArgs e)
-    {
-        await Navigation.PushAsync(new TrackListPage(_loader.GetLikedList(), new Music()
-        {
-            Artist = "",
-            CoverImage = "play.png",
-        }, _loader));
     }
 
     private void AccountButton_OnClicked(object sender, EventArgs e)

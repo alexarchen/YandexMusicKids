@@ -1,0 +1,2 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<musicApp:TrackListPage xmlns:musicApp="clr-namespace:MusicApp;assembly=MusicApp" Title="Tracks" IconImageSource="musicalbums.png"></musicApp:TrackListPage>

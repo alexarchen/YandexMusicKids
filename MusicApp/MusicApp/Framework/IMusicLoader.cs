@@ -6,7 +6,7 @@ using Yandex.Music.Api.Models.Album;
 using Yandex.Music.Api.Models.Artist;
 using Yandex.Music.Api.Models.Track;
 
-namespace MusicApp.Interfaces;
+namespace MusicApp.Framework;
 
 public interface IMusicLoader
 {
@@ -33,4 +33,6 @@ public interface IMusicLoader
     IEnumerable<YArtist> GetArtists();
 
     Task<IEnumerable<YAlbum>> GetAlbumsAsync(YArtist artist);
+    Task LikeAlbum(YAlbum albumBase);
+    Task DislikeAlbum(YAlbum albumBase);
 }

@@ -10,9 +10,9 @@ using Xamarin.Forms.Xaml;
 namespace MusicApp;
 
 [XamlCompilation(XamlCompilationOptions.Compile)]
-public partial class RecommendsPage : ContentPage
+public partial class RecommendsPage : AlbumsPage
 {
-    public RecommendsPage()
+    public RecommendsPage():base()
     {
         InitializeComponent();
     }

@@ -4,10 +4,9 @@
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:pv="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
+             xmlns:viewModel="clr-namespace:MusicApp.ViewModel;assembly=MusicApp"
              mc:Ignorable="d" NavigationPage.HasNavigationBar="False"
              x:Class="MusicApp.PlayerPage">
-
-
     <pv:PancakeView HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand" BackgroundGradientAngle="180">
         <pv:PancakeView.BackgroundGradientStops>
             <pv:GradientStopCollection>
@@ -64,17 +63,30 @@
                 <StackLayout HorizontalOptions="Center">
                     <StackLayout>
                         <Label Text="{Binding SelectedMusic.Title}" TextColor="Black" FontSize="25" HorizontalOptions="Center"/>
-                        <Label Text="{Binding SelectedMusic.Artist}" TextColor="Black" FontSize="15" Opacity="0.5" HorizontalOptions="Center"/>
+                        <Label HorizontalOptions="End" VerticalOptions="Center">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="{Binding SelectedMusic.Artist}" FontSize="20">
+                                     <Span.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding AlbumTapCommand}" />
+                                     </Span.GestureRecognizers>
+                                    </Span>
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
                     </StackLayout>
                 </StackLayout>
             </StackLayout>
             <StackLayout Spacing="100" Grid.Row="2" HorizontalOptions="FillAndExpand" VerticalOptions="StartAndExpand">
                 <StackLayout WidthRequest="250"  HorizontalOptions="Center">
-                    <Slider MinimumTrackColor="#D4420C" MaximumTrackColor="#C0C8D4" ThumbColor="#D4420C" Value="{Binding Position.TotalSeconds}" Maximum="{Binding Maximum}" HorizontalOptions="FillAndExpand"/>
+                    <Slider MinimumTrackColor="#D4420C" MaximumTrackColor="#C0C8D4" ThumbColor="#D4420C" Value="{Binding Position}" Minimum="0" x:Name="Slider" DragCompleted="Slider_OnDragCompleted" Maximum="{Binding Maximum}" HorizontalOptions="FillAndExpand"/>
                     <Grid HorizontalOptions="FillAndExpand">
-                        <Label Text="{Binding Position, StringFormat='{0:mm\\:ss}'}" FontSize="12" HorizontalOptions="Start" VerticalOptions="Center"/>
+                        <Label Text="{Binding PositionSpan, StringFormat='{0:mm\\:ss}'}" FontSize="12" HorizontalOptions="Start" VerticalOptions="Center"/>
                         <Label Text="{Binding Duration, StringFormat='{0:mm\\:ss}'}" FontSize="12" HorizontalOptions="End" VerticalOptions="Center"/>
                     </Grid>
+                    <StackLayout HorizontalOptions="Center">
+                        <ImageButton BackgroundColor="Transparent" WidthRequest="25" HeightRequest="25" Aspect="Fill" Source="{Binding SelectedMusic.LikedImage}" Command="{Binding LikeCommand}"></ImageButton>
+                    </StackLayout>
                 </StackLayout>
                 <StackLayout Orientation="Horizontal" Spacing="50" HorizontalOptions="Center">
                     <pv:PancakeView HasShadow="True" HeightRequest="40" WidthRequest="40" CornerRadius="20" HorizontalOptions="Center" 

@@ -4,24 +4,25 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using MusicApp.Interfaces;
+using MusicApp.Framework;
 using MusicApp.Model;
 using Xamarin.Forms;
 
 namespace MusicApp.ViewModel;
 
-public class MainPageViewModel: BaseViewModel
+public class AlbumsViewModel: BaseViewModel
 {
-    private readonly IMusicLoader _musicLoader;
-    public ObservableCollection<Music> FavoriteAlbums { get; private set; } = new();
+    protected IMusicLoader _musicLoader;
+    public ObservableCollection<Music> Albums { get; protected set; } = new();
 
-    public MainPageViewModel(IMusicLoader musicLoader)
+    public AlbumsViewModel(IMusicLoader musicLoader)
     {
         _musicLoader = musicLoader;
-        FavoriteAlbums = new ObservableCollection<Music>(_musicLoader.GetAlbums().GroupBy(a => a.Id).Select(g => g.First()).Select(a => new Music(a)));
+        Albums = new ObservableCollection<Music>(_musicLoader.GetAlbums().GroupBy(a => a.Id).Select(g => g.First()).Select(a => new Music(a, true)));
         _musicLoader.Reloaded += Reloaded;
     }
 
+    
     public ICommand RefreshCommand => new Command(Refresh);
     public bool IsRefreshing { get; set; }= false;
 
@@ -42,15 +43,22 @@ public class MainPageViewModel: BaseViewModel
         {
 
             Debug.WriteLine("Reload albums");
-            var ids = FavoriteAlbums.Select((a, i) => (a, i)).ToDictionary(o => o.a.Id, o => o.i);
-
-            var albums = _musicLoader.GetAlbums().GroupBy(a => a.Id).Select(g => g.First()).Select(a => new Music(a))
-                .ToDictionary(a => a.Id);
-
-            foreach (var album in albums.Values)
+            try
             {
-                if (!ids.ContainsKey(album.Id))
-                    FavoriteAlbums.Add(album);
+                var ids = Albums.Select((a, i) => (a, i)).ToDictionary(o => o.a.Id, o => o.i);
+
+                var albums = _musicLoader.GetAlbums().GroupBy(a => a.Id).Select(g => g.First()).Select(a => new Music(a, true))
+                    .ToDictionary(a => a.Id);
+
+                foreach (var album in albums.Values)
+                {
+                    if (!ids.ContainsKey(album.Id))
+                        Albums.Add(album);
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine($"Exception {e}");
             }
 
             //tOdo: delete from collection
@@ -58,11 +66,11 @@ public class MainPageViewModel: BaseViewModel
             IsRefreshing = false;
             OnPropertyChanged(nameof(IsRefreshing));
         });
-        // OnPropertyChanged(nameof(FavoriteAlbums));
+        // OnPropertyChanged(nameof(Albums));
     }
         
 
-    public MainPageViewModel()
+    public AlbumsViewModel()
     {
     }
 }

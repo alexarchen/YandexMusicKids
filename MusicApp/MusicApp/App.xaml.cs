@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using MusicApp.Framework;
 using Xamarin.Essentials;
@@ -20,43 +21,58 @@ namespace MusicApp
         {
             _api = new YandexMusicApi();
             _storage = new AuthStorage();
-            _loader = new MusicLoader(_api, _storage);
+            _loader = new MusicLoader(_api, _storage, this, Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "loader.cache"));
             
             InitializeComponent();
 
             MainPage = new NavigationPage(new MainPage());
         }
 
+        public IMusicLoader Loader => _loader;
         protected override void OnStart()
         {
             string login = Preferences.Get("Login", null);
             string pass = Preferences.Get("Password", null);
             string token = Preferences.Get("Token", null);
+            Task.Run(async () =>
+            {
+                if (!string.IsNullOrEmpty(token))
+                    await _api.User.AuthorizeAsync(_storage, token);
 
-            if (!string.IsNullOrEmpty(token))
-                _api.User.Authorize(_storage, token);
+                if (!_storage.IsAuthorized)
+                {
+                    if (!string.IsNullOrEmpty(login) && string.IsNullOrEmpty(pass))
+                        await _api.User.AuthorizeAsync(_storage, login, pass);
 
-            if (!_storage.IsAuthorized)
-            {
-                _api.User.Authorize(_storage, login, pass);
-                Preferences.Set("Token","");
-            }
-            if (!_storage.IsAuthorized)
-            {
-                RequestLogin();
-            }
-            else
-            {
-                _ = _loader.Reload();
-            }
+                    Preferences.Set("Token", "");
+                }
+
+                if (!_storage.IsAuthorized)
+                {
+                   Device.BeginInvokeOnMainThread(RequestLogin);
+                }
+                else
+                {
+                    await _loader.Reload();
+                }
+            });
 
         }
 
-        public void RequestLogin()
+        public void Logout()
+        {
+            string login = Preferences.Get("Login", null);
+            Preferences.Set("Password", null);
+            Preferences.Set("Token", null);
+            
+            RequestLogin();
+        }
+
+        public async void RequestLogin()
         {
             Login page = new Login(Preferences.Get("Login", ""),"");
             page.LoginClicked += LoginClicked;
-
+            await MainPage.Navigation.PushModalAsync(page, true);
         }
 
         async void LoginClicked(object o, Login.LoginEventArgs args)
@@ -71,8 +87,10 @@ namespace MusicApp
                 Preferences.Set("Login", args.Login.Login);
                 Preferences.Set("Password", args.Login.Password);
                 Preferences.Set("Token",_storage.Token);
+
+                await (o as Login)!.Navigation.PopModalAsync();
                 
-                await _loader.Reload();
+                _ = _loader.Reload();
             }
             else
             {
