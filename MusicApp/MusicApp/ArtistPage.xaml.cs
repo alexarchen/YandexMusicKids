@@ -10,9 +10,9 @@ using Xamarin.Forms.Xaml;
 namespace MusicApp;
 
 [XamlCompilation(XamlCompilationOptions.Compile)]
-public partial class MainPage : ContentPage
+public partial class ArtistPage : ContentPage
 {
-    public MainPage()
+    public ArtistPage()
     {
         InitializeComponent();
     }
