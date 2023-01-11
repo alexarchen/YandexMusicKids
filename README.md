@@ -1,7 +1,8 @@
-# Play Audio in Xamarin Forms | Complete Music Player App
-Learn how to design a COMPLETE Music Player in Xamarin Forms. In this video, we will make use of the Media Manager Plugin to make a music player app in Xamarin Forms and at the end you will see that music player in xamarin forms in quite easy.
+# Play selected Yandex Music Audio (for Kids)
 
-You can watch the video here ➤ https://youtu.be/7plenjrcloM
+Allow playing only favorite albums, tracks, artists without any clips, promotions, undesirable content
 
+1. Create child account in Yandex
+2. Use full Yandex Music App to select library or tracks, albums, artists (by settings likes)
+3. Install only this application on child's mobile and login under child account
 
-![alt text](https://devcrux.com/wp-content/uploads/MusicPlayer-Thumbnail.png) 
