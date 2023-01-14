@@ -12,6 +12,10 @@
                 <Entry Text="{Binding Login}" WidthRequest="200" HorizontalOptions="StartAndExpand"></Entry>
                 <Label Text="Password" HorizontalOptions="StartAndExpand"   WidthRequest="200"/>
                 <Entry Text="{Binding Password}" WidthRequest="200" IsPassword="True" HorizontalOptions="StartAndExpand"></Entry>
+                <StackLayout Orientation="Horizontal">
+                    <CheckBox IsChecked="{Binding Remember}"></CheckBox>
+                    <Label Text="Remember me"></Label>
+                </StackLayout>
                 <StackLayout Orientation="Horizontal"  WidthRequest="200">
                     <Button Text="Login" Clicked="LoginButton_Clicked" BackgroundColor="RoyalBlue"></Button>
                 </StackLayout>

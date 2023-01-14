@@ -12,13 +12,14 @@ namespace MusicApp;
 [XamlCompilation(XamlCompilationOptions.Compile)]
 public partial class Login : ContentPage
 {
-    public Login(string login, string pass)
+    public Login(string login, string pass, bool remember)
     {
         InitializeComponent();
         
         BindingContext = new LoginModel() {
             Login = login,
-            Password = pass
+            Password = pass,
+            Remember = remember
         };
 
     }

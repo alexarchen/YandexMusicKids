@@ -79,6 +79,23 @@ namespace Yandex.Music.Api.Common
                 Debug.Clear();
             }
         }
+        
+        /// <summary>
+        /// Конструктор
+        /// </summary>
+        public AuthStorage(IHttpClientFactory provider, DebugSettings settings = null)
+        {
+            User = new YAccount();
+            Context = new HttpContext();
+            Debug = settings;
+            Provider = new DefaultRequestProvider(this, provider);;
+
+            if (Debug is { ClearDirectory: true })
+            {
+                Debug.Clear();
+            }
+        }
+
 
         public void Logout()
         {

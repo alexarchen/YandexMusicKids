@@ -18,10 +18,10 @@ public partial class LikedTracksPage : TrackListPage
     {
         _musicLoader = (Application.Current as App)!.Loader;
         _musicLoader.Reloaded += MusicLoaderOnReloaded;
-        
+        CreateBindingContext();
     }
 
-    private static string LikeImage = "https://music.yandex.ru/blocks/playlist-cover/playlist-cover_like_2x.png";
+    private static readonly string LikeImage = "https://music.yandex.ru/blocks/playlist-cover/playlist-cover_like_2x.png";
 
     void CreateBindingContext()
     {
@@ -33,11 +33,11 @@ public partial class LikedTracksPage : TrackListPage
             Title = "Избранное",
             CoverImage = LikeImage,
         }, _musicLoader);
-
+        
     }
 
     private void MusicLoaderOnReloaded(object arg1, EventArgs arg2)
     {
-        CreateBindingContext();
+        Device.InvokeOnMainThreadAsync(CreateBindingContext);
     }
 }

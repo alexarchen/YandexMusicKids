@@ -33,11 +33,11 @@
                         <Grid Grid.Row="1" HeightRequest="80" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">
                             <BoxView BackgroundColor="Black" Opacity="0.7" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand"/>
                             <StackLayout Margin="40,0" VerticalOptions="Center" HorizontalOptions="FillAndExpand">
-                                <StackLayout Orientation="Horizontal" HorizontalOptions="Fill">
+                                <StackLayout Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                     <Label HorizontalOptions="Start" Text="{Binding  Album.Title}" TextColor="White" FontSize="17"/>
-                                    <ImageButton HorizontalOptions="End" Source="{Binding Album.LikedImage}" Command="{Binding LikeCommand}" WidthRequest="40" HeightRequest="40"></ImageButton>
+                                    <ImageButton HorizontalOptions="End" Source="{Binding Album.LikedImageLight}" BackgroundColor="Transparent" IsVisible="{Binding Album.CanLike}" Command="{Binding LikeCommand}" WidthRequest="40" HeightRequest="40"></ImageButton>
                                 </StackLayout>
-                                <Label FontSize="12" Opacity="0.8"/>
+                                <!--<Label FontSize="12" Opacity="0.8"/>-->
                                 <Label HorizontalOptions="Start" VerticalOptions="Center" Opacity="0.8" TextColor="White">
                                     <Label.FormattedText>
                                         <FormattedString>

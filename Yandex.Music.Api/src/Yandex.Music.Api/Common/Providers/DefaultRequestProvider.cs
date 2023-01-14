@@ -62,6 +62,11 @@ namespace Yandex.Music.Api.Common.Providers
 #endif
             _client.Timeout = TimeSpan.FromSeconds(30);
         }
+        
+        public DefaultRequestProvider(AuthStorage authStorage, IHttpClientFactory factory) : base(authStorage)
+        {
+            _client = factory.CreateClient(storage);
+        }
 
         #endregion Основные функции
 

@@ -9,8 +9,21 @@ namespace MusicApp.ViewModel
 {
     public class Music: BaseViewModel
     {
-        public string Title { get; set; }
-        public string Artist { get; set; }
+        public static int MaxTitleLength = 45;
+        public string Title
+        {
+            get => _title.Length>MaxTitleLength ? _title.Substring(0, MaxTitleLength)+"..." : _title;
+            set => _title = value;
+        }
+
+        public static int MaxArtistLength = 50;
+
+        public string Artist
+        {
+            get => _artist.Length>MaxArtistLength ? _artist.Substring(0, MaxArtistLength)+"..." : _artist;
+            set => _artist = value;
+        }
+
         public string Url { get; set; }
         
         public string Id { get; set; }
@@ -28,12 +41,16 @@ namespace MusicApp.ViewModel
             }
         }
 
+        public bool CanLike => !string.IsNullOrEmpty(Id);
         public object Base { get; set; }
         public Music()
         {
         }
 
         private bool _isLiked;
+        private string _title;
+        private string _artist;
+
         public bool IsLiked
         {
             get => _isLiked;
@@ -45,6 +62,7 @@ namespace MusicApp.ViewModel
             }
         }
         public string LikedImage => IsLiked ? "liked.png" : "like.png";
+        public string LikedImageLight => IsLiked ? "liked.png" : "likeWhite.png";
         public string PlayImage => _isCurrent ? "playCurrent.png" : "playBlack.png";
 
         public Music(YTrack track, bool isLiked)

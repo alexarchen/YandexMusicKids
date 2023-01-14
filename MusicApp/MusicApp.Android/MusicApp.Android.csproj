@@ -39,6 +39,7 @@
     <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
     <BundleAssemblies>false</BundleAssemblies>
     <MandroidI18n />
+    <AndroidSupportedAbis>armeabi-v7a;x86;arm64-v8a;x86_64</AndroidSupportedAbis>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -50,7 +51,7 @@
     <AndroidManagedSymbols>true</AndroidManagedSymbols>
     <AndroidUseSharedRuntime>false</AndroidUseSharedRuntime>
     <AndroidSupportedAbis>armeabi-v7a;x86;arm64-v8a;x86_64</AndroidSupportedAbis>
-    <AndroidPackageFormat>aab</AndroidPackageFormat>
+    <AndroidPackageFormat>apk</AndroidPackageFormat>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Mono.Android" />
@@ -86,6 +87,7 @@
     <AndroidResource Include="Resources\drawable\artist.png" />
     <AndroidResource Include="Resources\drawable\like.png" />
     <AndroidResource Include="Resources\drawable\liked.png" />
+    <AndroidResource Include="Resources\drawable\likeWhite.png" />
     <AndroidResource Include="Resources\drawable\musicalbums.png" />
     <AndroidResource Include="Resources\drawable\playCurrent.png" />
     <AndroidResource Include="Resources\drawable\user.png" />
