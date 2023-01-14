@@ -25,7 +25,6 @@ namespace MusicApp.ViewModel
             musicList = new ObservableCollection<Music>(tracks.Select(t => new Music(t,liked.TryGetValue(t.GetKey(), out var l) && l)));
         }
 
-
         ObservableCollection<Music> musicList;
         public ObservableCollection<Music> MusicList
         {
