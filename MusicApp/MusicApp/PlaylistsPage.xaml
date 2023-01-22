@@ -3,20 +3,20 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewModel="clr-namespace:MusicApp.ViewModel;assembly=MusicApp"
-             x:Class="MusicApp.AlbumsPage"
-             IconImageSource="album.png"
+             x:Class="MusicApp.PlaylistsPage"
+             IconImageSource="playlist.png"
              Title="Playlists">
     <ContentPage.BindingContext>
-        <viewModel:AlbumsViewModel/>
+        <viewModel:PlaylistsViewModel/>
     </ContentPage.BindingContext>    
     <ContentPage.Content>
         <StackLayout Orientation="Vertical">
             <RefreshView IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
-                <CollectionView ItemsSource="{Binding Albums}" VerticalOptions="FillAndExpand" 
+                <CollectionView ItemsSource="{Binding Playlists}" VerticalOptions="FillAndExpand" 
                                 HorizontalOptions="FillAndExpand" ItemsLayout="VerticalList" SelectionMode="Single" SelectionChanged="SelectableItemsView_OnSelectionChanged">
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
-                            <Grid Padding="5">
+                            <Grid Padding="10">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
@@ -27,9 +27,9 @@
                                 </Grid.ColumnDefinitions>
                                 <Image Grid.RowSpan="2"
                                        Source="{Binding CoverImage}"
-                                       Aspect="AspectFit"
-                                       HeightRequest="70"
-                                       WidthRequest="70" />
+                                       Aspect="AspectFill"
+                                       HeightRequest="60"
+                                       WidthRequest="60" />
                                 <Label Grid.Column="1"
                                        Text="{Binding Title}"
                                        FontAttributes="Bold" VerticalOptions="Center" />
@@ -44,5 +44,6 @@
                 </CollectionView>
                 </RefreshView>
         </StackLayout>
+        
     </ContentPage.Content>
 </ContentPage>

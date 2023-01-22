@@ -12,6 +12,7 @@ using Yandex.Music.Api.Common;
 using Yandex.Music.Api.Models.Account;
 using Yandex.Music.Api.Models.Album;
 using Yandex.Music.Api.Models.Artist;
+using Yandex.Music.Api.Models.Playlist;
 using Yandex.Music.Api.Models.Track;
 
 namespace MusicApp.Framework;
@@ -25,6 +26,7 @@ public class MusicLoader: IMusicLoader
     private List<YArtist> _artists = new();
     private List<YAlbum> _albums = new();
     private List<YTrack> _liked = new();
+    private YPlaylist[] _playlists = Array.Empty<YPlaylist>();
     private YAlbum[] _allAlbums = Array.Empty<YAlbum>();
 
     public MusicLoader(YandexMusicApi api, AuthStorage storage, App app, string cacheFileName)
@@ -41,6 +43,7 @@ public class MusicLoader: IMusicLoader
         public YAlbum[] Albums;
         public YTrack[] Liked;
         public YArtist[] Artists;
+        public YPlaylist[] Playlists;
     }
 
     public void LoadFromFile()
@@ -53,6 +56,7 @@ public class MusicLoader: IMusicLoader
                 _liked = obj.Liked.ToList();
                 _albums = obj.Albums.ToList();
                 _artists = obj.Artists.ToList();
+                _playlists = obj.Playlists ?? Array.Empty<YPlaylist>();
                 
                 Debug.WriteLine("Loaded from cache");
             }
@@ -74,7 +78,8 @@ public class MusicLoader: IMusicLoader
                     {
                         Artists = _artists.ToArray(),
                         Albums = _albums.ToArray(),
-                        Liked = _liked.ToArray()
+                        Liked = _liked.ToArray(),
+                        Playlists = _playlists
                     }, new JsonSerializerSettings(){ ContractResolver = new CamelCasePropertyNamesContractResolver()}));
         }
         catch (Exception e)
@@ -96,6 +101,11 @@ public class MusicLoader: IMusicLoader
     public IEnumerable<YTrack> GetLikedList()
     {
         return _liked;
+    }
+
+    public IEnumerable<YPlaylist> GetPlaylists()
+    {
+        return _playlists;
     }
 
     public async Task LikeTrack(YTrack t)
@@ -130,22 +140,19 @@ public class MusicLoader: IMusicLoader
                 var allAlbumIds = (await _api.Library.GetLikedAlbumsAsync(_storage)).Result.Select(a => a.Id)
                     .Concat(_liked.SelectMany(l => l.Albums.Select(a => a.Id))).Distinct().ToArray();
                 _allAlbums = (await _api.Album.GetAsync(_storage, allAlbumIds)).Result.ToArray();
+                _playlists = (await _api.Playlist.FavoritesAsync(_storage)).Result
+                    .Concat((await _api.Library.GetLikedPlaylistsAsync(_storage)).Result.Select(p => p.Playlist))
+                    .GroupBy(p => p.PlaylistUuid).Select(g => g.First()).ToArray();
             }
             catch (Exception e)
             {
               Debug.WriteLine($"Error reload: {e}");  
             }
-        }
-        else
-        {
-            _artists = new();
-            _albums = new();
-            _liked = new();
-            _allAlbums = Array.Empty<YAlbum>();
+            
+            await SaveToFileAsync();
+            Reloaded?.Invoke(this, new EventArgs() { });
         }
 
-        await SaveToFileAsync();
-        Reloaded?.Invoke(this, new EventArgs() { });
     }
 
     private async Task ReloadTracks()
@@ -197,6 +204,7 @@ public class MusicLoader: IMusicLoader
         _artists = new();
         _albums = new();
         _liked = new();
+        _playlists = Array.Empty<YPlaylist>();
         _allAlbums = Array.Empty<YAlbum>();
         _storage.Logout();
         _app.Logout();
@@ -235,5 +243,10 @@ public class MusicLoader: IMusicLoader
         
         Reloaded?.Invoke(this, new EventArgs() { });
     }
-    
+
+    public async Task<IEnumerable<YTrack>> GetTracksAsync(YPlaylist playlist)
+    {
+        var plist = (await _api.Playlist.GetAsync(_storage, playlist))?.Result;
+        return plist?.Tracks.Select(t => t.Track);
+    }
 }

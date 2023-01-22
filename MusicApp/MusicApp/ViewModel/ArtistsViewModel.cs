@@ -31,7 +31,6 @@ public class ArtistsViewModel: BaseViewModel
             await _loader.Reload();
         else
             IsRefreshing = false;
-        OnPropertyChanged(nameof(IsRefreshing));
     }
 
     public ArtistsViewModel()
@@ -64,7 +63,6 @@ public class ArtistsViewModel: BaseViewModel
                 //tOdo: delete from collection
 
                 IsRefreshing = false;
-                OnPropertyChanged(nameof(_isRefreshing));
             }
             catch (Exception e)
             {

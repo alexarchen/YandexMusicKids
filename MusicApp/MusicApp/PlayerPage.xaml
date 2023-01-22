@@ -57,16 +57,16 @@
             <StackLayout Grid.Row="1" Spacing="25" HorizontalOptions="Center" VerticalOptions="Center">
                 <pv:PancakeView HasShadow="True" BackgroundColor="White" HeightRequest="170" WidthRequest="170" CornerRadius="85" HorizontalOptions="Center" VerticalOptions="Center" >
                     <pv:PancakeView BackgroundColor="Gray" HeightRequest="150" WidthRequest="150" CornerRadius="75" HorizontalOptions="Center" VerticalOptions="Center">
-                        <Image Source="{Binding SelectedMusic.CoverImage}" Aspect="AspectFill" HeightRequest="150" WidthRequest="150" HorizontalOptions="Center" VerticalOptions="Center"/>
+                        <Image Source="{Binding SelectedMusic.CoverImageHD}" Aspect="AspectFill" HeightRequest="150" WidthRequest="150" HorizontalOptions="Center" VerticalOptions="Center"/>
                     </pv:PancakeView>
                 </pv:PancakeView>
                 <StackLayout HorizontalOptions="Center">
                     <StackLayout>
-                        <Label Text="{Binding SelectedMusic.Title}" TextColor="Black" FontSize="25" HorizontalOptions="Center"/>
+                        <Label Text="{Binding SelectedMusic.Title}" TextColor="Black" FontSize="18" HorizontalOptions="Center"/>
                         <Label HorizontalOptions="End" VerticalOptions="Center">
                             <Label.FormattedText>
                                 <FormattedString>
-                                    <Span Text="{Binding SelectedMusic.Artist}" FontSize="20">
+                                    <Span Text="{Binding SelectedMusic.Artist}" FontSize="16">
                                      <Span.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding AlbumTapCommand}" />
                                      </Span.GestureRecognizers>
@@ -77,8 +77,8 @@
                     </StackLayout>
                 </StackLayout>
             </StackLayout>
-            <StackLayout Spacing="100" Grid.Row="2" HorizontalOptions="FillAndExpand" VerticalOptions="StartAndExpand">
-                <StackLayout WidthRequest="250"  HorizontalOptions="Center">
+            <StackLayout Spacing="40" Grid.Row="2" HorizontalOptions="FillAndExpand" VerticalOptions="StartAndExpand">
+                <StackLayout WidthRequest="250"  HorizontalOptions="Center" VerticalOptions="StartAndExpand">
                     <Slider MinimumTrackColor="#D4420C" MaximumTrackColor="#C0C8D4" ThumbColor="#D4420C" Value="{Binding Position}" Minimum="0" x:Name="Slider" DragCompleted="Slider_OnDragCompleted" Maximum="{Binding Maximum}" HorizontalOptions="FillAndExpand"/>
                     <Grid HorizontalOptions="FillAndExpand">
                         <Label Text="{Binding PositionSpan, StringFormat='{0:mm\\:ss}'}" FontSize="12" HorizontalOptions="Start" VerticalOptions="Center"/>
@@ -88,7 +88,7 @@
                         <ImageButton BackgroundColor="Transparent" WidthRequest="25" HeightRequest="25" Aspect="Fill" Source="{Binding SelectedMusic.LikedImage}" Command="{Binding LikeCommand}"></ImageButton>
                     </StackLayout>
                 </StackLayout>
-                <StackLayout Orientation="Horizontal" Spacing="50" HorizontalOptions="Center">
+                <StackLayout Orientation="Horizontal" Spacing="50" HorizontalOptions="Center" VerticalOptions="End">
                     <pv:PancakeView HasShadow="True" HeightRequest="40" WidthRequest="40" CornerRadius="20" HorizontalOptions="Center" 
                             VerticalOptions="Center" BackgroundGradientAngle="180">
                         <pv:PancakeView.BackgroundGradientStops>

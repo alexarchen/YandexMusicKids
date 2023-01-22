@@ -9,6 +9,7 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using Android.OS;
+using Android.Support.V4.Content;
 using MediaManager;
 
 namespace MusicApp.Droid
@@ -56,12 +57,16 @@ namespace MusicApp.Droid
         {
             try
             {
-                const string errorFileName = "Fatal.log";
-                var libraryPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal); // iOS: Environment.SpecialFolder.Resources
-                var errorFilePath = Path.Combine(libraryPath, errorFileName);
-                var errorMessage = String.Format("Time: {0}\r\nError: Unhandled Exception\r\n{1}",
-                    DateTime.Now, exception.ToString());
-                File.WriteAllText(errorFilePath, errorMessage);
+                const string errorFileName = "YandexMusicKids_Fatal.log";
+                var errorFilePath = Path.Combine(Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDownloads)?.AbsolutePath??"/data", errorFileName);
+                var errorMessage = $"Time: {DateTime.Now}\r\nError: Unhandled Exception\r\n{exception}\r\n";
+                using (var file = File.Open(errorFilePath, FileMode.Append))
+                {
+                    using (var text = new StreamWriter(file))
+                    {
+                        text.Write(errorMessage);
+                    }
+                }
 
                 // Log to Android Device Logging.
                 Android.Util.Log.Error("Crash Report", errorMessage);

@@ -29,7 +29,7 @@
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <Image Aspect="AspectFill" Grid.RowSpan="2" Source="{Binding Album.CoverImage}"/>
+                        <Image Aspect="AspectFill" Grid.RowSpan="2" Source="{Binding Album.CoverImageHD}"/>
                         <Grid Grid.Row="1" HeightRequest="80" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">
                             <BoxView BackgroundColor="Black" Opacity="0.7" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand"/>
                             <StackLayout Margin="40,0" VerticalOptions="Center" HorizontalOptions="FillAndExpand">
@@ -80,7 +80,7 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <Image Source="{Binding CoverImage}" HeightRequest="40" WidthRequest="40" Aspect="AspectFill"></Image>
+                            <Image Source="{Binding CoverImage}" HeightRequest="40" WidthRequest="40" Aspect="AspectFit"></Image>
                             <StackLayout Grid.Column="1" VerticalOptions="Center" Padding="5">
                                 <Label Text="{Binding Title}" TextColor="Black" FontSize="17"/>
                                 <Label Text="{Binding Artist}" TextColor="Black" FontSize="12" Opacity="0.5"/>

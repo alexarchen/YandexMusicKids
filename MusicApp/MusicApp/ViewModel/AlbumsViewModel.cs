@@ -66,7 +66,7 @@ public class AlbumsViewModel: BaseViewModel
             IsRefreshing = false;
             OnPropertyChanged(nameof(IsRefreshing));
         });
-        // OnPropertyChanged(nameof(Albums));
+        // OnPropertyChanged(nameof(Playlists));
     }
         
 

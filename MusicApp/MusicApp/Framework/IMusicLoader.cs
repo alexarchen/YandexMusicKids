@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Yandex.Music.Api.Models.Account;
 using Yandex.Music.Api.Models.Album;
 using Yandex.Music.Api.Models.Artist;
+using Yandex.Music.Api.Models.Playlist;
 using Yandex.Music.Api.Models.Track;
 
 namespace MusicApp.Framework;
@@ -15,6 +16,8 @@ public interface IMusicLoader
     IEnumerable<YAlbum> GetAlbums();
 
     IEnumerable<YTrack> GetLikedList();
+
+    IEnumerable<YPlaylist> GetPlaylists();
 
     Task LikeTrack(YTrack t);
 
@@ -35,4 +38,5 @@ public interface IMusicLoader
     Task<IEnumerable<YAlbum>> GetAlbumsAsync(YArtist artist);
     Task LikeAlbum(YAlbum albumBase);
     Task DislikeAlbum(YAlbum albumBase);
+    Task<IEnumerable<YTrack>> GetTracksAsync(YPlaylist playlist);
 }

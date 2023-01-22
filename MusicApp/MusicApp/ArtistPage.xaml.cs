@@ -20,7 +20,7 @@ public partial class ArtistPage : AlbumsPage
         _artist = artist;
         BindingContext = new ArtistViewModel(_loader, artist);
     }
-
+/*
     private async void SelectableItemsView_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (e.CurrentSelection.Count > 0)
@@ -36,4 +36,5 @@ public partial class ArtistPage : AlbumsPage
             (sender as CollectionView)!.SelectedItem = null;
         }
     }
+    */
 }

@@ -17,7 +17,7 @@
                                 HorizontalOptions="FillAndExpand" ItemsLayout="VerticalList" SelectionMode="Single" SelectionChanged="SelectableItemsView_OnSelectionChanged">
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
-                            <Grid Padding="10">
+                            <Grid Padding="5">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
@@ -29,8 +29,8 @@
                                 <Image Grid.RowSpan="2"
                                        Source="{Binding CoverImage}"
                                        Aspect="AspectFill"
-                                       HeightRequest="60"
-                                       WidthRequest="60" />
+                                       HeightRequest="70"
+                                       WidthRequest="70" />
                                 <Label Grid.Column="1"
                                        Text="{Binding Title}"
                                        FontAttributes="Bold" VerticalOptions="Center" />

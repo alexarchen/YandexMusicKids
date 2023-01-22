@@ -13,22 +13,24 @@ using MediaManager.Library;
 using MediaManager.Media;
 using MediaManager.Playback;
 using MediaManager.Player;
+using MediaManager.Queue;
 using MusicApp.Framework;
 using Xamarin.Essentials;
 using Xamarin.Forms;
+using Xamarin.Forms.Internals;
 using Yandex.Music.Api.Models.Track;
 
 namespace MusicApp.ViewModel
 {
-    public class PlayerViewModel : BaseViewModel, IAsyncDisposable
+    public class PlayerViewModel : BaseViewModel, IDisposable, IAsyncDisposable
     {
-        private IMusicLoader _loader;
+        private readonly IMusicLoader _loader;
         private IMediaManager MediaManager {get; set; } = CrossMediaManager.Current;
-        private CancellationTokenSource _tokenSource = new CancellationTokenSource();
+        private readonly CancellationTokenSource _tokenSource = new CancellationTokenSource();
         private bool _bLoaded;
 
         public static PlayerViewModel LastPlayerModel;
-        TrackListViewModel _trackListViewModel;
+        readonly TrackListViewModel _trackListViewModel;
         private Task _queueTask;
 
 
@@ -71,7 +73,7 @@ namespace MusicApp.ViewModel
             if (next!=null) tracks.Add(next);
             model.SelectedMusic = music;
 
-            List<MediaItem> queue = new List<MediaItem>();
+            List<IMediaItem> queue = new List<IMediaItem>();
             
             foreach (var item in tracks)
             {
@@ -81,12 +83,7 @@ namespace MusicApp.ViewModel
                     if (item.Url==null) return
                     null;
                 }
-                queue.Add(new MediaItem()
-                {
-                    Id = item.Id,
-                    Extras = item,
-                    MediaUri = item.Url
-                });
+                queue.Add(FromMusic(item));
                 Debug.WriteLine($"Added {item.Id} to queue");
             }
 
@@ -102,20 +99,40 @@ namespace MusicApp.ViewModel
                     {
                         while (!model._isPlaying)
                         {
-                            await Task.Delay(100, tsc.Token);
+                            await Task.Delay(50, tsc.Token);
                         }
-                    });
+                    }, tsc.Token);
                 }
                 catch (TaskCanceledException e)
                 {
                     
                 }
 
-                model.MediaManager.Queue.Insert(0, new MediaItem() { MediaUri = prev.Url, Id = prev.Id });
+                if (!tsc.IsCancellationRequested)
+                {
+                    model.MediaManager.Queue.MediaItems.Insert(0,FromMusic(prev));
+                    model.MediaManager.Queue.CurrentIndex++;
+                    
+                    Debug.WriteLine($"Insert media item {prev.Id}");
+                }
+                
             }
 
             model._bLoaded = true;
             return model;
+        }
+
+        private static IMediaItem FromMusic(Music track)
+        {
+            return new MediaItem()
+            {
+                MediaUri = track.Url,
+                Id = track.Id,
+                Extras = track,
+                Artist = track.Artist,
+                Title = track.Title,
+                ImageUri = track.CoverImage
+            };
         }
 
         public PlayerViewModel(TrackListViewModel trackListViewModel, IMusicLoader loader)
@@ -155,6 +172,14 @@ namespace MusicApp.ViewModel
         {
             Debug.WriteLine($"StateChanged: {Enum.GetName(typeof(MediaPlayerState), e.State)}");
             IsPlaying = e.State == MediaPlayerState.Playing || (e.State != MediaPlayerState.Paused && e.State != MediaPlayerState.Stopped && _isPlaying);
+            
+//            Debug.WriteLine($"Dump player state: {MediaManager.Queue.CurrentIndex} {MediaManager.Queue.Current?.Id} {MediaManager.Queue.Current?.Title}");
+            
+            if (IsPlaying && (MediaManager.Queue.Current?.Id != SelectedMusic.Id))
+            {
+                Debug.WriteLine($"Media item wasn't changed in UI");
+                MediaManagerOnMediaItemChanged(this, new MediaItemEventArgs(MediaManager.Queue.Current));
+            }
         }
 
         private void MediaManagerOnPositionChanged(object sender, MediaManager.Playback.PositionChangedEventArgs e)
@@ -186,11 +211,7 @@ namespace MusicApp.ViewModel
                     {
                         if (next.Url == null) next.Url = await _loader.GetTrackUrl(next.Base as YTrack);
                         Debug.WriteLine($"Added {next.Id} to queue");
-                        MediaManager.Queue.Add(new MediaItem()
-                        {
-                            Id = next.Id,
-                            MediaUri = next.Url
-                        });
+                        MediaManager.Queue.MediaItems.Add(FromMusic(next));
                     }
                 }
             }
@@ -309,6 +330,7 @@ namespace MusicApp.ViewModel
 
         public ICommand ArtistTapCommand => new Command(OpenArtist);
 
+        public ICommand AlbumTapCommand => new Command(() => { });
 
         private async void OpenArtist()
         {
@@ -355,6 +377,7 @@ namespace MusicApp.ViewModel
                     NextMusic();
             }
         }
+        /*
 
         private async Task PlayMusic(Music music)
         {
@@ -376,61 +399,36 @@ namespace MusicApp.ViewModel
             {
                 Debug.WriteLine("Error play: "+e.Message);
             }
-            /*
-            Device.StartTimer(TimeSpan.FromMilliseconds(500), () => 
-            {
-                Duration = mediaInfo.Duration;
-                Maximum = duration.TotalSeconds;
-                Position = mediaInfo.Position;
-                return true;
-            });*/
         }
+    */
 
         private void NextMusic()
         {
-            /*
-            var currentIndex = musicList.IndexOf(selectedMusic);
-
-            if (currentIndex < musicList.Count - 1)
-            {
-                SelectedMusic = musicList[currentIndex + 1];
-                PlayMusic(selectedMusic);
-            }*/
             if (_bLoaded)
                 MediaManager.PlayNext();
         }
 
-        private void PreviousMusic()
+        private async void PreviousMusic()
         {
-            /*
-            var currentIndex = musicList.IndexOf(selectedMusic);
-
-            if (currentIndex > 0)
-            {
-                SelectedMusic = musicList[currentIndex - 1];
-                PlayMusic(selectedMusic);
-            } */
 
             if (_bLoaded)
             {
                 var prev = FindPrevMusic(_selectedMusic);
                 if (prev != null)
                 {
-                    if (prev.Url == null) prev.Url = _loader.GetTrackUrl(prev.Base as YTrack).Result;
+                    if (prev.Url == null) prev.Url = await _loader.GetTrackUrl(prev.Base as YTrack);
                     
                     if (MediaManager.Queue.Previous == null)
                     {
                         var pprev = FindPrevMusic(prev);
                         if (pprev is { Url: null })
-                            pprev.Url = _loader.GetTrackUrl(pprev.Base as YTrack).Result;
+                            pprev.Url = await _loader.GetTrackUrl(pprev.Base as YTrack);
                         Debug.WriteLine($"Insert {prev.Id} in queue");
-                        MediaManager.Queue.Insert(0,new MediaItem()
-                        {
-                            Id = prev.Id,
-                            MediaUri = prev.Url
-                        });
+                        MediaManager.Queue.Insert(0,FromMusic(prev));
+                        MediaManager.Queue.CurrentIndex++;
+                        
                     }
-                    MediaManager.PlayPrevious();
+                    await MediaManager.PlayPrevious();
                 }
             }
         }

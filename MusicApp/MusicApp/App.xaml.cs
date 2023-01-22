@@ -7,11 +7,9 @@ using System.Threading.Tasks;
 using MusicApp.Framework;
 using Xamarin.Essentials;
 using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
 using Yandex.Music.Api;
 using Yandex.Music.Api.Common;
 using Yandex.Music.Api.Common.Providers;
-using Yandex.Music.Client;
 
 namespace MusicApp
 {
@@ -46,12 +44,21 @@ namespace MusicApp
             
             InitializeComponent();
 
-            MainPage = new NavigationPage(new MainPage());
+            var p = new NavigationPage(new MainPage());
+            MainPage = p;
+
         }
 
         public IMusicLoader Loader => _loader;
         protected override void OnStart()
         {
+                
+            FileStream stream = new FileStream(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "debug.log"), FileMode.Create,
+                FileAccess.Write, FileShare.Read);
+
+            int l = Trace.Listeners.Add(new TextWriterTraceListener(stream, "debugfile"));
+            Trace.Listeners[l].TraceOutputOptions = TraceOptions.DateTime;
+            
             
             string login = Preferences.Get("Login", null);
             string pass = Preferences.Get("Password", null);
@@ -81,14 +88,24 @@ namespace MusicApp
                 }
 
 
-                if (!_storage.IsAuthorized && !string.IsNullOrEmpty(login) && !string.IsNullOrEmpty(pass))
+                while (!_storage.IsAuthorized && !string.IsNullOrEmpty(login) && !string.IsNullOrEmpty(pass))
                 {
-                    await _api.User.AuthorizeAsync(_storage, login, pass);
+                        try
+                        {
+                            await _api.User.AuthorizeAsync(_storage, login, pass);
+                            break;
+                        }
+                        catch (Exception e)
+                        {
+                            Debug.WriteLine(e);
+                            await Task.Delay(5000);
+                        }
 
-                    if (_storage.IsAuthorized)
-                        Preferences.Set("Token", _storage.Token);
                 }
                               
+                if (_storage.IsAuthorized)
+                    Preferences.Set("Token", _storage.Token);
+                
 
                 if (!_storage.IsAuthorized)
                 {
@@ -104,7 +121,7 @@ namespace MusicApp
 
         public void Logout()
         {
-            string login = Preferences.Get("Login", null);
+            Preferences.Set("Login", null);
             Preferences.Remove("Password");
             Preferences.Set("Token", null);
             
@@ -113,15 +130,22 @@ namespace MusicApp
 
         public async void RequestLogin()
         {
-            Login page = new Login(Preferences.Get("Login", ""),"", Preferences.ContainsKey("Password"));
+            Login page = new Login(Preferences.Get("Login", ""), Preferences.Get("Password",""), Preferences.ContainsKey("Password"));
             page.LoginClicked += LoginClicked;
             await MainPage.Navigation.PushModalAsync(page, true);
         }
 
         async void LoginClicked(object o, Login.LoginEventArgs args)
         {
-            await _api.User.AuthorizeAsync(_storage, args.Login.Login, args.Login.Password);
-                
+            try
+            {
+                await _api.User.AuthorizeAsync(_storage, args.Login.Login, args.Login.Password);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine("Authorize: "+e);
+            }
+
             if (_storage.IsAuthorized)
             {
                 (o as Login)!.LoginClicked -= LoginClicked;

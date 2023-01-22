@@ -6,6 +6,7 @@
              xmlns:android="clr-namespace:Xamarin.Forms.PlatformConfiguration.AndroidSpecific;assembly=Xamarin.Forms.Core"
              xmlns:musicApp="clr-namespace:MusicApp;assembly=MusicApp"
              android:TabbedPage.ToolbarPlacement="Bottom"
+             NavigationPage.HasNavigationBar="False"
              Title="Yandex Music for Kids"
              >
     <musicApp:AlbumsPage />
@@ -15,6 +16,7 @@
         </x:Arguments>
     </NavigationPage>
     <musicApp:ArtistsPage />
+    <musicApp:PlaylistsPage />
     <musicApp:Account/>
 </TabbedPage>
 
