@@ -12,6 +12,7 @@ using Android.OS;
 using Android.Support.V4.Content;
 using MediaManager;
 
+
 namespace MusicApp.Droid
 {
     [Activity(Label = "MusicApp", Icon = "@mipmap/icon", Theme = "@style/MainTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]

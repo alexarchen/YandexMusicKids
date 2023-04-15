@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30011.22
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MusicApp.UWP", "MusicApp\MusicApp.UWP\MusicApp.UWP.csproj", "{FC874378-CED4-45FF-AE11-C72764075A6E}"
 EndProject
@@ -9,11 +9,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MusicApp.Android", "MusicAp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MusicApp.iOS", "MusicApp\MusicApp.iOS\MusicApp.iOS.csproj", "{1B1E1F04-D468-4903-967D-93E937FC349D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MusicApp", "MusicApp\MusicApp\MusicApp.csproj", "{312DD455-1C56-431F-8532-D6760348BC20}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MusicApp", "MusicApp\MusicApp\MusicApp.csproj", "{312DD455-1C56-431F-8532-D6760348BC20}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yandex.Music.Api", "Yandex.Music.Api\src\Yandex.Music.Api\Yandex.Music.Api.csproj", "{7C09D003-BB3D-448D-9E1B-B26EF1622457}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Yandex.Music.Api", "Yandex.Music.Api\src\Yandex.Music.Api\Yandex.Music.Api.csproj", "{7C09D003-BB3D-448D-9E1B-B26EF1622457}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yandex.Music.Client", "Yandex.Music.Api\src\Yandex.Music.Client\Yandex.Music.Client.csproj", "{916A389E-B6CE-4DEF-A4CC-A164333CF271}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Yandex.Music.Client", "Yandex.Music.Api\src\Yandex.Music.Client\Yandex.Music.Client.csproj", "{916A389E-B6CE-4DEF-A4CC-A164333CF271}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
