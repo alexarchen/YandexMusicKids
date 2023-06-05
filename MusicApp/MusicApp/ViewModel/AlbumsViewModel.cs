@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using MusicApp.Framework;
-using MusicApp.Model;
 using Xamarin.Forms;
 
 namespace MusicApp.ViewModel;

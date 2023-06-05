@@ -12,17 +12,19 @@ namespace MusicApp
     {
         private readonly TrackListViewModel _trackListViewModel;
         private readonly IMusicLoader _loader;
+        private readonly ILogger _logger;
 
-        public PlayerPage(TrackListViewModel trackListViewModel,Music music, IMusicLoader loader)
+        public PlayerPage(TrackListViewModel trackListViewModel,Music music, IMusicLoader loader, ILogger logger)
         {
             _trackListViewModel = trackListViewModel;
             _loader = loader;
-            
+            _logger = logger;
+
             InitializeComponent();
 
             Device.InvokeOnMainThreadAsync(async ()=>
             {
-                BindingContext = await PlayerViewModel.CreateAsync(trackListViewModel, music, _loader);
+                BindingContext = await PlayerViewModel.CreateAsync(trackListViewModel, music, _loader, _logger);
             });
            
         }
