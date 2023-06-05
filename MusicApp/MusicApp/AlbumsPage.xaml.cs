@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using MusicApp.Framework;
-using MusicApp.Model;
 using MusicApp.ViewModel;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -12,10 +11,12 @@ namespace MusicApp;
 public partial class AlbumsPage : ContentPage
 {
     protected IMusicLoader _loader;
+    private readonly ILogger _logger;
 
-    public AlbumsPage(IMusicLoader loader)
+    public AlbumsPage(IMusicLoader loader, ILogger logger)
     {
         _loader = loader;
+        _logger = logger;
         InitializeComponent();
         BindingContext = new AlbumsViewModel(loader);
     }
@@ -40,7 +41,7 @@ public partial class AlbumsPage : ContentPage
             if (!string.IsNullOrEmpty(albumId))
             {
                 var tracks = await _loader.GetTracksAsync(albumId);
-                await Navigation.PushAsync(new TrackListPage(tracks, album, _loader));
+                await Navigation.PushAsync(new TrackListPage(tracks, album, _loader, _logger));
             }
 
             (sender as CollectionView)!.SelectedItem = null;

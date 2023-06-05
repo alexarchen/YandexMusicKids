@@ -28,6 +28,34 @@ namespace Yandex.Music.Api.API
         }
         
         /// <summary>
+        /// Авторизация по коду
+        /// </summary>
+        /// <param name="storage">Хранилище</param>
+        /// <param name="token">Токен авторизации</param>
+        /// <returns></returns>
+        public async Task AuthorizeViaCodeAsync(AuthStorage storage, TokenRequest req)
+        {
+            if (string.IsNullOrEmpty(req?.Code))
+                throw new Exception("Задан пустой код авторизации.");
+
+            var tokenResp = await new YGetTokenBuilder(api, storage).Build(req).GetResponseAsync();
+            storage.Token = tokenResp.AccessToken;
+
+            // Пытаемся получить информацию о пользователе
+            var authInfo = await GetUserAuthAsync(storage);
+
+            // Если не авторизован, то авторизуем
+            if (string.IsNullOrEmpty(authInfo?.Result?.Account?.Uid))
+                throw new Exception("Пользователь незалогинен.");
+
+            // Флаг авторизации
+            storage.IsAuthorized = true;
+            //var authUserDetails = await GetUserAuthDetailsAsync(storage);
+            //var authUser = authUserDetails.User;
+
+            storage.User = authInfo.Result.Account;
+        }
+        /// <summary>
         /// Авторизация
         /// </summary>
         /// <param name="storage">Хранилище</param>
@@ -41,10 +69,10 @@ namespace Yandex.Music.Api.API
             storage.Token = token;
 
             // Пытаемся получить информацию о пользователе
-            YResponse<YAccountResult> authInfo = await GetUserAuthAsync(storage);
+            var authInfo = await GetUserAuthAsync(storage);
 
             // Если не авторизован, то авторизуем
-            if (string.IsNullOrEmpty(authInfo.Result.Account.Uid))
+            if (string.IsNullOrEmpty(authInfo?.Result?.Account?.Uid))
                 throw new Exception("Пользователь незалогинен.");
 
             // Флаг авторизации
@@ -102,16 +130,6 @@ namespace Yandex.Music.Api.API
             return new YGetAuthInfoBuilder(api, storage)
                 .Build(null)
                 .GetResponseAsync();
-        }
-
-        /// <summary>
-        /// Получение информации об авторизации
-        /// </summary>
-        /// <param name="storage">Хранилище</param>
-        /// <returns></returns>
-        public YResponse<YAccountResult> GetUserAuth(AuthStorage storage)
-        {
-            return GetUserAuthAsync(storage).GetAwaiter().GetResult();
         }
 
         #endregion Основные функции

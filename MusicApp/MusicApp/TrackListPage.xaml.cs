@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MusicApp.Framework;
-using MusicApp.Model;
 using MusicApp.ViewModel;
 using Xamarin.Forms;
 using Yandex.Music.Api.Models.Track;
@@ -17,10 +16,10 @@ namespace MusicApp
     [DesignTimeVisible(false)]
     public partial class TrackListPage : ContentPage
     {
-        public TrackListPage(IEnumerable<YTrack> tracks, Music album, IMusicLoader loader)
+        public TrackListPage(IEnumerable<YTrack> tracks, Music album, IMusicLoader loader, ILogger logger)
         {
             InitializeComponent();
-            BindingContext = new TrackListViewModel(tracks, album, loader);
+            BindingContext = new TrackListViewModel(tracks, album, loader, logger);
         }
 
         public TrackListPage()

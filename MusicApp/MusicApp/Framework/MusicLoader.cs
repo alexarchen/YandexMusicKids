@@ -19,9 +19,10 @@ namespace MusicApp.Framework;
 
 public class MusicLoader: IMusicLoader
 {
-    private readonly YandexMusicApi _api;
+    private readonly Yandex.Music.Api.YandexMusicApi _api;
     private readonly AuthStorage _storage;
     private readonly App _app;
+    private readonly ILogger _logger;
     private readonly string _cacheFileName;
     private List<YArtist> _artists = new();
     private List<YAlbum> _albums = new();
@@ -29,11 +30,12 @@ public class MusicLoader: IMusicLoader
     private YPlaylist[] _playlists = Array.Empty<YPlaylist>();
     private YAlbum[] _allAlbums = Array.Empty<YAlbum>();
 
-    public MusicLoader(YandexMusicApi api, AuthStorage storage, App app, string cacheFileName)
+    public MusicLoader(Yandex.Music.Api.YandexMusicApi api, AuthStorage storage, App app, ILogger logger, string cacheFileName)
     {
         _api = api;
         _storage = storage;
         _app = app;
+        _logger = logger;
         _cacheFileName = cacheFileName;
         LoadFromFile();
     }
@@ -58,11 +60,11 @@ public class MusicLoader: IMusicLoader
                 _artists = obj.Artists.ToList();
                 _playlists = obj.Playlists ?? Array.Empty<YPlaylist>();
                 
-                Debug.WriteLine("Loaded from cache");
+                _logger.Info("Loaded from cache");
             }
             catch (Exception e)
             {
-                Debug.WriteLine($"Error loading cache: {e}");
+                _logger.Info($"Error loading cache: {e}");
             }
 
         }
@@ -84,13 +86,24 @@ public class MusicLoader: IMusicLoader
         }
         catch (Exception e)
         {
-            Debug.WriteLine($"Error saving cache: {e}");
+            _logger.Error($"Error saving cache:", e);
         }
         
     }
     public async Task<string> GetTrackUrl(YTrack track)
     {
-        return await _api.Track.GetFileLinkAsync(_storage, track.GetKey().ToString());
+        try
+        {
+            _logger.Info($"Loading track {track.Id}...");
+            var res = await _api.Track.GetFileLinkAsync(_storage, track.GetKey().ToString());
+            _logger.Info($"Track {track.Id} url loaded: {res}");
+            return res;
+        }
+        catch (Exception e)
+        {
+            _logger.Error($"Error loading track {track.Id}", e);
+            throw;
+        }
     }
 
     public IEnumerable<YAlbum> GetAlbums()
@@ -146,7 +159,7 @@ public class MusicLoader: IMusicLoader
             }
             catch (Exception e)
             {
-              Debug.WriteLine($"Error reload: {e}");  
+              _logger.Error("Error reload:", e);  
             }
             
             await SaveToFileAsync();
@@ -164,7 +177,7 @@ public class MusicLoader: IMusicLoader
         }
         catch (Exception e)
         {
-            Debug.WriteLine($"Error reload tracks: {e}");  
+            _logger.Error("Error reload tracks:", e);  
         }
 
         await SaveToFileAsync();
@@ -180,7 +193,7 @@ public class MusicLoader: IMusicLoader
         }
         catch (Exception e)
         {
-            Debug.WriteLine($"Error reload albums: {e}");  
+            _logger.Error("Error reload albums:", e);  
         }
 
         await SaveToFileAsync();

@@ -1,5 +1,4 @@
-﻿using MusicApp.Model;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -16,10 +15,12 @@ namespace MusicApp.ViewModel
     public class TrackListViewModel : BaseViewModel
     {
         private readonly IMusicLoader _loader;
+        private readonly ILogger _logger;
 
-        public TrackListViewModel(IEnumerable<YTrack> tracks, Music album, IMusicLoader loader)
+        public TrackListViewModel(IEnumerable<YTrack> tracks, Music album, IMusicLoader loader, ILogger logger)
         {
             _loader = loader;
+            _logger = logger;
             _album = album;
             var liked = _loader.GetLikedList().ToDictionary(i => i.GetKey(), i=> true);
             musicList = new ObservableCollection<Music>(tracks.Select(t => new Music(t,liked.TryGetValue(t.GetKey(), out var l) && l)));
@@ -102,13 +103,13 @@ namespace MusicApp.ViewModel
 
                 if (music == null)
                 {
-                    var playerPage = new PlayerPage(this, _selectedMusic, _loader);
+                    var playerPage = new PlayerPage(this, _selectedMusic, _loader, _logger);
                     var navigation = Application.Current.MainPage as NavigationPage;
                     navigation?.PushAsync(playerPage, true);
                 }
                 else
                 {
-                    _= PlayerViewModel.CreateAsync(this, music as Music, _loader);
+                    _= PlayerViewModel.CreateAsync(this, music as Music, _loader, _logger);
                 }
 
             }

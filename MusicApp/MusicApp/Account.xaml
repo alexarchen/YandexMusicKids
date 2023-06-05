@@ -6,7 +6,7 @@
              IconImageSource="user.png"
              Title="Account">
     <ContentPage.Content>
-        <StackLayout>
+        <StackLayout Orientation="Vertical">
             <Label Text="{Binding Name}"
                    VerticalOptions="CenterAndExpand"
                    HorizontalOptions="CenterAndExpand" />

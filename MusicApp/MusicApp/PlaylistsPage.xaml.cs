@@ -15,10 +15,13 @@ namespace MusicApp;
 public partial class PlaylistsPage : ContentPage
 {
     private IMusicLoader _loader;
+    private ILogger _logger;
 
     public PlaylistsPage()
     {
         _loader = (Application.Current as App)?.Loader;
+        _logger = (Application.Current as App)?.Logger;
+        
         InitializeComponent();
         BindingContext = new PlaylistsViewModel(_loader);
         
@@ -36,7 +39,7 @@ public partial class PlaylistsPage : ContentPage
             if (album?.Base is YPlaylist playlist)
             {
                 var tracks = await _loader.GetTracksAsync(playlist);
-                await Navigation.PushAsync(new TrackListPage(tracks, album, _loader));
+                await Navigation.PushAsync(new TrackListPage(tracks, album, _loader, _logger));
             }
 
             (sender as CollectionView)!.SelectedItem = null;

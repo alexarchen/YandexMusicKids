@@ -1,5 +1,4 @@
 ﻿using MediaManager;
-using MusicApp.Model;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -25,6 +24,7 @@ namespace MusicApp.ViewModel
     public class PlayerViewModel : BaseViewModel, IDisposable, IAsyncDisposable
     {
         private readonly IMusicLoader _loader;
+        private readonly ILogger _logger;
         private IMediaManager MediaManager {get; set; } = CrossMediaManager.Current;
         private readonly CancellationTokenSource _tokenSource = new CancellationTokenSource();
         private bool _bLoaded;
@@ -32,7 +32,8 @@ namespace MusicApp.ViewModel
         public static PlayerViewModel LastPlayerModel;
         readonly TrackListViewModel _trackListViewModel;
         private Task _queueTask;
-
+        private DateTime? lastAction;
+        static TimeSpan IdleTimeout = TimeSpan.FromMinutes(60);
 
         Music FindPrevMusic(Music music)
         {
@@ -61,9 +62,9 @@ namespace MusicApp.ViewModel
             }
         }
             
-        public static async Task<PlayerViewModel> CreateAsync(TrackListViewModel trackListViewModel, Music music, IMusicLoader loader)
+        public static async Task<PlayerViewModel> CreateAsync(TrackListViewModel trackListViewModel, Music music, IMusicLoader loader, ILogger logger)
         {
-            var model = new PlayerViewModel(trackListViewModel, loader);
+            var model = new PlayerViewModel(trackListViewModel, loader, logger);
             
             var next = model.FindNextMusic(music);
             var prev = model.FindPrevMusic(music);
@@ -135,7 +136,7 @@ namespace MusicApp.ViewModel
             };
         }
 
-        public PlayerViewModel(TrackListViewModel trackListViewModel, IMusicLoader loader)
+        public PlayerViewModel(TrackListViewModel trackListViewModel, IMusicLoader loader, ILogger logger)
         {
             Debug.WriteLine("Creating PlayerViewModel...");
             if (LastPlayerModel != null)
@@ -147,11 +148,13 @@ namespace MusicApp.ViewModel
 
             LastPlayerModel = this;
             MediaManager.Stop();
-            
+            DoAction();
+
             _trackListViewModel = trackListViewModel;
             _musicList = trackListViewModel.MusicList;
             _selectedMusic = trackListViewModel.SelectedMusic;
             _loader = loader;
+            _logger = logger;
             Duration = default;
             Maximum = 1f;
             Position = 0;
@@ -170,14 +173,14 @@ namespace MusicApp.ViewModel
 
         private void MediaManagerOnStateChanged(object sender, StateChangedEventArgs e)
         {
-            Debug.WriteLine($"StateChanged: {Enum.GetName(typeof(MediaPlayerState), e.State)}");
+            _logger.Info($"StateChanged: {Enum.GetName(typeof(MediaPlayerState), e.State)}");
             IsPlaying = e.State == MediaPlayerState.Playing || (e.State != MediaPlayerState.Paused && e.State != MediaPlayerState.Stopped && _isPlaying);
             
 //            Debug.WriteLine($"Dump player state: {MediaManager.Queue.CurrentIndex} {MediaManager.Queue.Current?.Id} {MediaManager.Queue.Current?.Title}");
             
             if (IsPlaying && (MediaManager.Queue.Current?.Id != SelectedMusic.Id))
             {
-                Debug.WriteLine($"Media item wasn't changed in UI");
+                _logger.Info($"Media item wasn't changed in UI");
                 MediaManagerOnMediaItemChanged(this, new MediaItemEventArgs(MediaManager.Queue.Current));
             }
         }
@@ -199,8 +202,8 @@ namespace MusicApp.ViewModel
 
         private async void MediaManagerOnMediaItemChanged(object sender, MediaItemEventArgs e)
         {
-            Debug.WriteLine($"Music changed event: {e.MediaItem?.Id}");
-            
+            _logger.Info($"Music changed event: {e.MediaItem?.Id}");
+
             if (e.MediaItem != null)
             {
                 SelectedMusic = _musicList.FirstOrDefault(l => l.Id == e.MediaItem.Id);
@@ -210,11 +213,23 @@ namespace MusicApp.ViewModel
                     if (MediaManager.Queue.MediaItems.IndexOf(e.MediaItem) == MediaManager.Queue.Count - 1)
                     {
                         if (next.Url == null) next.Url = await _loader.GetTrackUrl(next.Base as YTrack);
-                        Debug.WriteLine($"Added {next.Id} to queue");
+                        _logger.Info($"Added {next.Id} to queue");
                         MediaManager.Queue.MediaItems.Add(FromMusic(next));
                     }
                 }
             }
+            
+            if (DateTime.Now - lastAction > IdleTimeout)
+            {
+                if (_isPlaying)
+                {
+                    _logger.Info($"Stop by idle timeout");
+                    
+                    await MediaManager.Pause();
+                    IsPlaying = false;
+                }
+            }
+
         }
 
         #region Properties
@@ -272,8 +287,14 @@ namespace MusicApp.ViewModel
         public void SetPosition(double position)
         {
             MediaManager.MediaPlayer.SeekTo(TimeSpan.FromSeconds(position));
+            DoAction();
         }
 
+        void DoAction()
+        {
+            lastAction = DateTime.Now;
+        }
+        
         double _maximum = 100f;
         public double Maximum
         {
@@ -349,6 +370,7 @@ namespace MusicApp.ViewModel
                 await _loader.LikeTrack(_selectedMusic.Base as YTrack);
             }
             
+            DoAction();
             _selectedMusic.IsLiked = !_selectedMusic.IsLiked;
         }
 
@@ -364,6 +386,7 @@ namespace MusicApp.ViewModel
                     await MediaManager.Play();
                     IsPlaying = true;
                 }
+                DoAction();
         }
         
         private void ChangeMusic(object obj)
@@ -375,32 +398,10 @@ namespace MusicApp.ViewModel
                     PreviousMusic();
                 else if ((string)obj == "N")
                     NextMusic();
+                
+                DoAction();
             }
         }
-        /*
-
-        private async Task PlayMusic(Music music)
-        {
-            Debug.WriteLine($"Start playing music {music.Id}");
-            
-            try
-            {
-                if (music.Url == null)
-                    music.Url = await _loader.GetTrackUrl(music?.Base as YTrack);
-
-                if (MediaManager != null) await MediaManager.Pause();
-                if (MediaManager != null) 
-                    if (!await MediaManager.PlayQueueItem(MediaManager.Queue.FirstOrDefault(i => i.Id == music.Id)))
-                        Debug.WriteLine($"PlayQueueItem {music.Id} returns false");
-                //if (MediaManager != null) await MediaManager.Play();
-                IsPlaying = true;
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine("Error play: "+e.Message);
-            }
-        }
-    */
 
         private void NextMusic()
         {
@@ -423,7 +424,7 @@ namespace MusicApp.ViewModel
                         var pprev = FindPrevMusic(prev);
                         if (pprev is { Url: null })
                             pprev.Url = await _loader.GetTrackUrl(pprev.Base as YTrack);
-                        Debug.WriteLine($"Insert {prev.Id} in queue");
+                        _logger.Info($"Insert {prev.Id} in queue");
                         MediaManager.Queue.Insert(0,FromMusic(prev));
                         MediaManager.Queue.CurrentIndex++;
                         

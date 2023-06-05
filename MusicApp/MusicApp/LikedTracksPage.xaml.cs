@@ -14,9 +14,12 @@ namespace MusicApp;
 public partial class LikedTracksPage : TrackListPage
 {
     private IMusicLoader _musicLoader;
+    private ILogger _logger;
     public LikedTracksPage():base()
     {
         _musicLoader = (Application.Current as App)!.Loader;
+        _logger = (Application.Current as App)!.Logger;
+        
         _musicLoader.Reloaded += MusicLoaderOnReloaded;
         CreateBindingContext();
     }
@@ -32,7 +35,7 @@ public partial class LikedTracksPage : TrackListPage
             Artist = "",
             Title = "Избранное",
             CoverImage = LikeImage,
-        }, _musicLoader);
+        }, _musicLoader, _logger);
         
     }
 

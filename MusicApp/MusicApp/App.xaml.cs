@@ -5,42 +5,35 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using MusicApp.Framework;
+using MusicApp.ViewModel;
 using Xamarin.Essentials;
 using Xamarin.Forms;
+using Xamarin.Forms.PlatformConfiguration;
 using Yandex.Music.Api;
 using Yandex.Music.Api.Common;
 using Yandex.Music.Api.Common.Providers;
+using Yandex.Music.Api.Requests.Account;
 
 namespace MusicApp
 {
-    public class HttpClientFactory : IHttpClientFactory
-    {
-        public static HttpClient Client { get; private set; }
-        public HttpClient CreateClient(AuthStorage storage)
-        {
-            Client =  new HttpClient(new HttpClientHandler()
-            {
-                    AutomaticDecompression = DecompressionMethods.GZip,
-                    UseCookies = true,
-                    UseProxy = false,
-                    CookieContainer = storage.Context.Cookies
-            });
-            Client.Timeout = TimeSpan.FromSeconds(30);
-            return Client;
-        }
-    }
-    
     public partial class App : Application
     {
-        private readonly YandexMusicApi _api;
+        private readonly Yandex.Music.Api.YandexMusicApi _api;
         private readonly AuthStorage _storage;
         private readonly MusicLoader _loader;
+        public const string CLIENT_ID = "23cabbbdc6cd418abb4b39c32c41195d";// "ddbcdca5635f4637891b02c84ccda50f";
+        public const string CLIENT_SECRET = "e0181ca2628746039469ac34f70bb4e2";
 
-        public App()
+        private ILoginRequester _loginRequester;
+        private readonly ILogger _logger;
+
+        public App(ILoginRequester loginRequester, ILogger logger)
         {
-            _api = new YandexMusicApi();
-            _storage = new AuthStorage(new HttpClientFactory());
-            _loader = new MusicLoader(_api, _storage, this, Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "loader.cache"));
+            _loginRequester = loginRequester;
+            _logger = logger;
+            _api = new Yandex.Music.Api.YandexMusicApi();
+            _storage = new AuthStorage();
+            _loader = new MusicLoader(_api, _storage, this, logger, Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "loader.cache"));
             
             InitializeComponent();
 
@@ -50,6 +43,7 @@ namespace MusicApp
         }
 
         public IMusicLoader Loader => _loader;
+        public ILogger Logger => _logger;
         protected override void OnStart()
         {
                 
@@ -60,9 +54,8 @@ namespace MusicApp
             Trace.Listeners[l].TraceOutputOptions = TraceOptions.DateTime;
             
             
-            string login = Preferences.Get("Login", null);
-            string pass = Preferences.Get("Password", null);
             string token = Preferences.Get("Token", null);
+            
             Task.Run(async () =>
             {
                 if (!string.IsNullOrEmpty(token))
@@ -88,25 +81,6 @@ namespace MusicApp
                 }
 
 
-                while (!_storage.IsAuthorized && !string.IsNullOrEmpty(login) && !string.IsNullOrEmpty(pass))
-                {
-                        try
-                        {
-                            await _api.User.AuthorizeAsync(_storage, login, pass);
-                            break;
-                        }
-                        catch (Exception e)
-                        {
-                            Debug.WriteLine(e);
-                            await Task.Delay(5000);
-                        }
-
-                }
-                              
-                if (_storage.IsAuthorized)
-                    Preferences.Set("Token", _storage.Token);
-                
-
                 if (!_storage.IsAuthorized)
                 {
                    Device.BeginInvokeOnMainThread(RequestLogin);
@@ -121,8 +95,6 @@ namespace MusicApp
 
         public void Logout()
         {
-            Preferences.Set("Login", null);
-            Preferences.Remove("Password");
             Preferences.Set("Token", null);
             
             RequestLogin();
@@ -130,16 +102,42 @@ namespace MusicApp
 
         public async void RequestLogin()
         {
-            Login page = new Login(Preferences.Get("Login", ""), Preferences.Get("Password",""), Preferences.ContainsKey("Password"));
-            page.LoginClicked += LoginClicked;
+            /*
+            string uid = Preferences.Get("UUID", Guid.NewGuid().ToString());
+            Preferences.Set("UUID",uid);
+
+            Login page = new Login(Preferences.Get("Logon", ""),uid);
+            page.Logon += Logon;
             await MainPage.Navigation.PushModalAsync(page, true);
+            
+            */
+
+            try
+            {
+                var token = await _loginRequester.RequestLogin(new LoginModel() { Login = Preferences.Get("Logon", null) });
+                if (token != null)
+                    Logon(this, new Login.LoginEventArgs() { Token = token });
+            }
+            catch (Exception e)
+            {
+                
+            }
+            
+
         }
 
-        async void LoginClicked(object o, Login.LoginEventArgs args)
+        async void Logon(object o, Login.LoginEventArgs args)
         {
             try
             {
-                await _api.User.AuthorizeAsync(_storage, args.Login.Login, args.Login.Password);
+                if (args.Code!=null)
+                    await _api.User.AuthorizeViaCodeAsync(_storage, new TokenRequest()
+                    {
+                        Code = args.Code, ClientId = CLIENT_ID, ClientSecret = CLIENT_SECRET,
+                        DeviceId = Preferences.Get("UUID", ""), DeviceName = Device.RuntimePlatform
+                    });
+                else
+                    await _api.User.AuthorizeAsync(_storage, args.Token);
             }
             catch (Exception e)
             {
@@ -148,23 +146,16 @@ namespace MusicApp
 
             if (_storage.IsAuthorized)
             {
-                (o as Login)!.LoginClicked -= LoginClicked;
-                await (o as Login)!.Navigation.PopModalAsync();
-                
-                Preferences.Set("Login", args.Login.Login);
-                if (args.Login.Remember)
-                 Preferences.Set("Password", args.Login.Password);
-                else
-                    Preferences.Remove("Password");
                 Preferences.Set("Token",_storage.Token);
+                Preferences.Set("Login",_storage.User.Login);
 
-                await (o as Login)!.Navigation.PopModalAsync();
+                await ((o as Login)?.Navigation.PopModalAsync() ?? Task.CompletedTask);
                 
                 _ = _loader.Reload();
             }
             else
             {
-                await (o as Login)!.DisplayAlert("Attention!", "Error during login! Check login, password and Internet", "Ok");
+                await ((o as Login) ?? MainPage).DisplayAlert("Attention!", "Error during login! Check login, password and Internet", "Ok");
             }
                 
         }
