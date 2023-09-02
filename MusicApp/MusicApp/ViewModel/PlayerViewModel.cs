@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -25,7 +26,7 @@ namespace MusicApp.ViewModel
     {
         private readonly IMusicLoader _loader;
         private readonly ILogger _logger;
-        private IMediaManager MediaManager {get; set; } = CrossMediaManager.Current;
+        private IMediaManager MediaManager { get; set; } = (Application.Current as App).Player;
         private readonly CancellationTokenSource _tokenSource = new CancellationTokenSource();
         private bool _bLoaded;
 
@@ -78,7 +79,7 @@ namespace MusicApp.ViewModel
             
             foreach (var item in tracks)
             {
-                if (item.Url == null)
+                if ((item.LocalUrl ?? item.Url) == null)
                 {
                     item.Url = await model._loader.GetTrackUrl(item.Base as YTrack);
                     if (item.Url==null) return
@@ -94,31 +95,25 @@ namespace MusicApp.ViewModel
                 if (prev.Url==null) prev.Url = await model._loader.GetTrackUrl(prev.Base as YTrack);
 
                 var tsc = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-                try
+                _= Task.Run(async () =>
                 {
-                    await Task.Run(async () =>
+                    while (!model._isPlaying)
                     {
-                        while (!model._isPlaying)
-                        {
-                            await Task.Delay(50, tsc.Token);
-                        }
-                    }, tsc.Token);
-                }
-                catch (TaskCanceledException e)
+                        await Task.Delay(50, tsc.Token);
+                    }
+                }).ContinueWith(t =>
                 {
+                    if (t.IsCompleted) {
+                        
+                        model.MediaManager.Queue.MediaItems.Insert(0,FromMusic(prev));
+                        model.MediaManager.Queue.CurrentIndex++;
                     
-                }
+                        logger.Info($"Insert media item {prev.Id}");
 
-                if (!tsc.IsCancellationRequested)
-                {
-                    model.MediaManager.Queue.MediaItems.Insert(0,FromMusic(prev));
-                    model.MediaManager.Queue.CurrentIndex++;
-                    
-                    Debug.WriteLine($"Insert media item {prev.Id}");
-                }
-                
+                    }
+                });
             }
-
+    
             model._bLoaded = true;
             return model;
         }
@@ -127,7 +122,7 @@ namespace MusicApp.ViewModel
         {
             return new MediaItem()
             {
-                MediaUri = track.Url,
+                MediaUri = track.LocalUrl ?? track.Url,
                 Id = track.Id,
                 Extras = track,
                 Artist = track.Artist,
@@ -337,13 +332,18 @@ namespace MusicApp.ViewModel
         }
 
         public string PlayIcon { get => _isPlaying ? "pause.png" : "play.png"; }
-
+        
         #endregion
 
         public ICommand PlayCommand => new Command(Play);
         public ICommand ChangeCommand => new Command(ChangeMusic);
         public ICommand BackCommand => new Command(() => Application.Current.MainPage.Navigation.PopAsync());
-        public ICommand ShareCommand => new Command(() => Share.RequestAsync(_selectedMusic.Url, _selectedMusic.Title));
+        public ICommand ShareCommand => new Command(() =>
+        {
+            _selectedMusic.IsDownloaded = !_selectedMusic.IsDownloaded;
+            OnPropertyChanged("");
+            _loader.Download(_selectedMusic);
+        });
 
         public ICommand PositionsCommand => new Command(() => {  });
 

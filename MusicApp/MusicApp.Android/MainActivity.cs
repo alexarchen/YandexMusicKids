@@ -36,8 +36,10 @@ namespace MusicApp.Droid
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
             
-            CrossMediaManager.Current.Init();
-            LoadApplication(new App(this, new Logger()));
+            //CrossMediaManager.Current.Init();
+            var player = new Player();
+            player.Init();
+            LoadApplication(new App(this, new Logger(), player)); // CrossMediaManager.Current;
         }
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {

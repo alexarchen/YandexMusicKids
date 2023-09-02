@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using MusicApp.ViewModel;
 using Yandex.Music.Api.Models.Account;
 using Yandex.Music.Api.Models.Album;
 using Yandex.Music.Api.Models.Artist;
@@ -39,4 +40,5 @@ public interface IMusicLoader
     Task LikeAlbum(YAlbum albumBase);
     Task DislikeAlbum(YAlbum albumBase);
     Task<IEnumerable<YTrack>> GetTracksAsync(YPlaylist playlist);
+    void Download(Music selectedMusic);
 }

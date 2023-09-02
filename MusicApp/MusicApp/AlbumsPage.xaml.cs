@@ -13,17 +13,11 @@ public partial class AlbumsPage : ContentPage
     protected IMusicLoader _loader;
     private readonly ILogger _logger;
 
-    public AlbumsPage(IMusicLoader loader, ILogger logger)
-    {
-        _loader = loader;
-        _logger = logger;
-        InitializeComponent();
-        BindingContext = new AlbumsViewModel(loader);
-    }
-
     public AlbumsPage()
     {
         _loader = (Application.Current as App)?.Loader;
+        _logger = (Application.Current as App)?.Logger;
+            
         InitializeComponent();
         BindingContext = new AlbumsViewModel(_loader);
         

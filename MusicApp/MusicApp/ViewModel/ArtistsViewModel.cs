@@ -60,7 +60,10 @@ public class ArtistsViewModel: BaseViewModel
                         Artists.Add(artist);
                 }
 
-                //tOdo: delete from collection
+                foreach (var artist in Artists.Where(a=>!artists.ContainsKey(a.Id)))
+                {
+                        Artists.Remove(artist);
+                }
 
                 IsRefreshing = false;
             }

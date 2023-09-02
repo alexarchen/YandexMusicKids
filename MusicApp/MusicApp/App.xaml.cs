@@ -4,6 +4,8 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using MediaManager;
+using MediaManager.Player;
 using MusicApp.Framework;
 using MusicApp.ViewModel;
 using Xamarin.Essentials;
@@ -21,16 +23,18 @@ namespace MusicApp
         private readonly Yandex.Music.Api.YandexMusicApi _api;
         private readonly AuthStorage _storage;
         private readonly MusicLoader _loader;
+        private readonly IMediaManager _player;
         public const string CLIENT_ID = "23cabbbdc6cd418abb4b39c32c41195d";// "ddbcdca5635f4637891b02c84ccda50f";
         public const string CLIENT_SECRET = "e0181ca2628746039469ac34f70bb4e2";
 
         private ILoginRequester _loginRequester;
         private readonly ILogger _logger;
 
-        public App(ILoginRequester loginRequester, ILogger logger)
+        public App(ILoginRequester loginRequester, ILogger logger, IMediaManager player)
         {
             _loginRequester = loginRequester;
             _logger = logger;
+            _player = player;
             _api = new Yandex.Music.Api.YandexMusicApi();
             _storage = new AuthStorage();
             _loader = new MusicLoader(_api, _storage, this, logger, Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "loader.cache"));
@@ -44,6 +48,8 @@ namespace MusicApp
 
         public IMusicLoader Loader => _loader;
         public ILogger Logger => _logger;
+
+        public IMediaManager Player => _player;
         protected override void OnStart()
         {
                 

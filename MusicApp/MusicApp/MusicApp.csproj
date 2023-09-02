@@ -27,8 +27,4 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Yandex.Music.Api\src\Yandex.Music.Client\Yandex.Music.Client.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Model" />
-  </ItemGroup>
 </Project>

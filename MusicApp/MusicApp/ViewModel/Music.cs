@@ -1,5 +1,7 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Xamarin.Forms;
 using Yandex.Music.Api.Models.Album;
 using Yandex.Music.Api.Models.Artist;
@@ -68,6 +70,23 @@ namespace MusicApp.ViewModel
         public string LikedImageLight => IsLiked ? "liked.png" : "likeWhite.png";
         public string PlayImage => _isCurrent ? "playCurrent.png" : "playBlack.png";
 
+        public string DownloadImage => IsDownloaded ? "Download.png" : (DownloadTask?.IsCompleted == false ? "Downloading.png" : "Remove.png");
+
+        public Task DownloadTask;
+        private string _localUrl;
+        public bool IsDownloaded => _localUrl != null;
+
+        public string LocalUrl
+        {
+            get => _localUrl;
+            set
+            {
+                _localUrl = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(IsDownloaded));
+            }
+        }
+
         public Music(YTrack track, bool isLiked)
         {
             Title = track.Title;
@@ -77,6 +96,7 @@ namespace MusicApp.ViewModel
             CoverImageHD = "https://" + (track.OgImage ?? track.CoverUri)?.Replace("%%", "200x200");
             Base = track;
             _isLiked = isLiked;
+            _localUrl = File.Exists($"cache_{Id}") ? $"cache_{Id}" : null;
         }
 
         public Music(YAlbum album, bool isLiked)

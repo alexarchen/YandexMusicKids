@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
+using MusicApp.ViewModel;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Yandex.Music.Api;
@@ -29,6 +31,7 @@ public class MusicLoader: IMusicLoader
     private List<YTrack> _liked = new();
     private YPlaylist[] _playlists = Array.Empty<YPlaylist>();
     private YAlbum[] _allAlbums = Array.Empty<YAlbum>();
+    private HttpClient _downloadClient = new HttpClient();
 
     public MusicLoader(Yandex.Music.Api.YandexMusicApi api, AuthStorage storage, App app, ILogger logger, string cacheFileName)
     {
@@ -261,5 +264,19 @@ public class MusicLoader: IMusicLoader
     {
         var plist = (await _api.Playlist.GetAsync(_storage, playlist))?.Result;
         return plist?.Tracks.Select(t => t.Track);
+    }
+
+    public void Download(Music selectedMusic)
+    {
+        if (selectedMusic.DownloadTask?.IsCompleted == false) return;
+        if (selectedMusic.Url==null) return;
+        if (!selectedMusic.IsDownloaded)
+            selectedMusic.DownloadTask = Task.Run(async () =>
+            {
+                var bytes = await (await _downloadClient.GetAsync(selectedMusic.Url)).Content.ReadAsByteArrayAsync();
+                var fname = $"cache_{selectedMusic.Id}";
+                await File.WriteAllBytesAsync(fname,bytes);
+                selectedMusic.LocalUrl = fname;
+            });
     }
 }
